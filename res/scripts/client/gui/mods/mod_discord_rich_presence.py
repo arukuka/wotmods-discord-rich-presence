@@ -1,10 +1,12 @@
 import threading
+import time
 
 import BigWorld
 from gui.battle_control import avatar_getter
 from gui.impl import backport
 from gui.impl.gen import R
-from helpers import i18n
+from helpers import i18n, dependency
+from skeletons.gui.app_loader import IAppLoader, GuiGlobalSpaceID
 import pprint
 
 g_engine = None
@@ -47,6 +49,14 @@ class Engine:
         self.__native.init_engine()
 
 
+    def __enter_lobby(self, *_):
+        print('__enter_lobby')
+        activity = self.__native.Activity()
+        activity.details = 'In Lobby'
+        activity.timestamps.start = int(time.time())
+        self.__native.update_activity(activity)
+
+
     def __onArenaPeriodChange(self, period, *_):
         print('__onArenaPeriodChange', period, _)
         if self.__native is None:
@@ -61,7 +71,6 @@ class Engine:
         info = common_process_arena()
         pprint.pprint(info)
 
-        import time
         if period == ARENA_PERIOD.WAITING:
             activity.state = backport.text(R.strings.ingame_gui.timer.waiting())
             activity.timestamps.start = int(time.time())
@@ -79,14 +88,39 @@ class Engine:
         self.__native.update_activity(activity)
 
 
+    def __onEnqueued(self, spaceID):
+        print('__onEnqueued')
+        activity = self.__native.Activity()
+        activity.details = 'In Queue'
+        activity.timestamps.start = int(time.time())
+        self.__native.update_activity(activity)
+
+
+    def __onGUISpaceEntered(self, spaceID):
+        print('__onGUISpaceEntered')
+        if spaceID == GuiGlobalSpaceID.LOBBY:
+            self.__enter_lobby()
+
+
     def run_callbacks(self):
         if self.__native is not None:
             self.__native.run_callbacks()
 
 
     def register_events(self):
+        # Main Play Event
         from PlayerEvents import g_playerEvents
         g_playerEvents.onArenaPeriodChange += self.__onArenaPeriodChange
+
+        # In Lobby
+        g_playerEvents.onDequeued        += self.__enter_lobby
+        g_playerEvents.onEnqueueFailure  += self.__enter_lobby
+        g_playerEvents.onKickedFromQueue += self.__enter_lobby
+        appLoader = dependency.instance(IAppLoader)
+        appLoader.onGUISpaceEntered += self.__onGUISpaceEntered
+
+        # In Queue
+        g_playerEvents.onEnqueued += self.__onEnqueued
 
 
 def init():
