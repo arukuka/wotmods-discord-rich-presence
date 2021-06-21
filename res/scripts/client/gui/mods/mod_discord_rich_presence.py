@@ -15,7 +15,7 @@ event = threading.Event()
 
 def run_callbacks():
     global g_engine
-    while not event.wait(timeout=0.1):
+    while not event.wait(timeout=1):
         g_engine.run_callbacks()
 
 
