@@ -1,0 +1,3 @@
+[submodule "cmake_discord_game_sdk"]
+	path = cmake_discord_game_sdk
+	url = git@github.com:arukuka/cmake_discord_game_sdk.git

@@ -1,0 +1,17 @@
+{
+    "id": "arukuka.discord_rich_presence",
+    "name": "Discord Rich Presence",
+    "description": "Discord Rich Presence native module",
+
+    "version": "0.1.0",
+    "dependencies": ["com.modxvm.xfw.native"],
+
+    "url": "https://github.com/arukuka/wotmods-discord-rich-presence",
+    "url_update": "https://github.com/arukuka/wotmods-discord-rich-presence",
+
+    "wot_version_min": "1.12.1.2",
+    "wot_version_exactmatch": false,
+
+    "features": ["native", "python"],
+    "architecture": ["32bit", "64bit"]
+}
