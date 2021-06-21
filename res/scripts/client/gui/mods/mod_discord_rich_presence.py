@@ -7,8 +7,6 @@ from gui.impl.gen import R
 from helpers import i18n
 import pprint
 
-_ARENA_TYPE_EXT_FORMAT = '#menu:loading/battleTypes/{0}'
-
 g_engine = None
 run_callbacks_thread = None
 event = threading.Event()
@@ -55,7 +53,7 @@ class Engine:
             return
 
         from constants import ARENA_PERIOD
-        if period not in [ARENA_PERIOD.WAITING, ARENA_PERIOD.PREBATTLE, ARENA_PERIOD.BATTLE]:
+        if period not in (ARENA_PERIOD.WAITING, ARENA_PERIOD.PREBATTLE, ARENA_PERIOD.BATTLE):
             return
 
         activity = self.__native.Activity()
