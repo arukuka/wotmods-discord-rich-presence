@@ -1,12 +1,14 @@
 import threading
 import time
+import json
 
 import BigWorld
 from gui.battle_control import avatar_getter
 from gui.impl import backport
 from gui.impl.gen import R
-from helpers import i18n, dependency
+from helpers import i18n, dependency, getClientLanguage
 from skeletons.gui.app_loader import IAppLoader, GuiGlobalSpaceID
+import ResMgr
 import pprint
 
 g_engine = None
@@ -30,15 +32,49 @@ def common_process_arena():
     gameplayName = backport.text(gameplayName)
     from gui.battle_results.components.common import _ARENA_TYPE_EXT_FORMAT
     arenaGuiName = i18n.makeString(_ARENA_TYPE_EXT_FORMAT.format(arenaGuiType))
-    vehicleName = vehicleDesc.type.userString if vehicleDesc is not None else 'None'
+    vehicleName      = vehicleDesc.type.userString      if vehicleDesc is not None else ''
+    vehicleShortName = vehicleDesc.type.shortUserString if vehicleDesc is not None else ''
 
     info = dict()
-    info['#arenaName']    = arenaName
-    info['#gameplayName'] = gameplayName
-    info['#arenaGuiName'] = arenaGuiName
-    info['#vehicleName']  = vehicleName
+    info['#arenaName']        = arenaName
+    info['#gameplayName']     = gameplayName
+    info['#arenaGuiName']     = arenaGuiName
+    info['#vehicleName']      = vehicleName
+    info['#vehicleShortName'] = vehicleShortName
 
     return info
+
+
+def read_file(vfs_path):
+    print('trying to load {}'.format(vfs_path))
+    vfs_file = ResMgr.openSection(vfs_path)
+    if vfs_file is not None and ResMgr.isFile(vfs_path):
+        print('    success')
+        return str(vfs_file.asString)
+    else:
+        print('    failed: {}'.format(ResMgr.resolveToAbsolutePath(vfs_path)))
+
+
+    return None
+
+
+def load_settings():
+    DEFAULT_LANGUAGE = 'en'
+    SETTINGS_PATH_FORMAT = '../mods/configs/arukuka.discord_rich_presence/{}.json'
+
+    language = getClientLanguage()
+    print(language)
+    settings_json = read_file(SETTINGS_PATH_FORMAT.format(language))
+    if settings_json is None:
+        settings_json = read_file(SETTINGS_PATH_FORMAT.format(DEFAULT_LANGUAGE))
+
+    print(type(settings_json), settings_json)
+    settings_json = settings_json.encode('utf-8')
+    print(type(settings_json), settings_json)
+    settings = json.loads(settings_json)
+
+    return settings
+
 
 class Engine:
     def __init__(self):
@@ -47,6 +83,8 @@ class Engine:
         print(xfwnative.unpack_native('arukuka.discord_rich_presence'))
         self.__native = xfwnative.load_native('arukuka.discord_rich_presence', 'engine.pyd', 'engine')
         self.__native.init_engine()
+
+        self.__settings = load_settings()
 
 
     def __enter_lobby(self, *_):
@@ -72,10 +110,9 @@ class Engine:
         pprint.pprint(info)
 
         if period == ARENA_PERIOD.WAITING:
-            activity.state = backport.text(R.strings.ingame_gui.timer.waiting())
+            info["#waiting_message"] = backport.text(R.strings.ingame_gui.timer.waiting())
             activity.timestamps.start = int(time.time())
         elif period == ARENA_PERIOD.PREBATTLE:
-            activity.state = 'Wating to start'
             remain = BigWorld.player().arena.periodEndTime - BigWorld.serverTime()
             activity.timestamps.end = int(time.time() + remain)
         elif period == ARENA_PERIOD.BATTLE:
@@ -83,8 +120,15 @@ class Engine:
             elapsed = BigWorld.player().arena.periodLength - remain
             activity.timestamps.start = int(time.time() - elapsed)
 
-        activity.details = '{#arenaGuiName} | {#arenaName} | {#gameplayName} | {#vehicleName}'.format(**info)
+        PERIOD_KEYS = {
+            ARENA_PERIOD.WAITING:   "arena_waiting",
+            ARENA_PERIOD.PREBATTLE: "arena_prebattle",
+            ARENA_PERIOD.BATTLE:    "arena_battle"
+        }
+        activity.state   = self.__settings[PERIOD_KEYS[period]]['state'  ].format(**info)
+        activity.details = self.__settings[PERIOD_KEYS[period]]['details'].format(**info)
         activity.get_ref_activity_assets().large_image = 'icon'
+
         self.__native.update_activity(activity)
 
 

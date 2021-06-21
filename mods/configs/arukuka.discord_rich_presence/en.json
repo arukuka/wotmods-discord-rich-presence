@@ -1,0 +1,27 @@
+{
+    "in_lobby": {
+        "enabled": true,
+        "state": "",
+        "details": "In Lobby"
+    },
+    "in_queue": {
+        "enabled": true,
+        "state": "",
+        "details": "In Queue"
+    },
+    "arena_waiting": {
+        "enabled": true,
+        "state": "{#waiting_message}",
+        "details": "Playing {#vehicleShortName} on {#arenaName}"
+    },
+    "arena_prebattle": {
+        "enabled": true,
+        "state": "Waiting to start",
+        "details": "Playing {#vehicleShortName} on {#arenaName}"
+    },
+    "arena_battle": {
+        "enabled": true,
+        "state": "",
+        "details": "Playing {#vehicleShortName} on {#arenaName}"
+    }
+}
