@@ -76,6 +76,7 @@ class Engine:
     def __init__(self):
         import xfw_loader.python as loader
         xfwnative = loader.get_mod_module('com.modxvm.xfw.native')
+        xfwnative.unpack_native('arukuka.discord_rich_presence')
         self.__native = xfwnative.load_native('arukuka.discord_rich_presence', 'engine.pyd', 'engine')
         self.__native.init_engine()
 
