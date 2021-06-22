@@ -3,11 +3,11 @@ import time
 import json
 
 import BigWorld
-from gui.battle_control import avatar_getter
 from gui.impl import backport
 from gui.impl.gen import R
 from helpers import i18n, dependency, getClientLanguage
 from skeletons.gui.app_loader import IAppLoader, GuiGlobalSpaceID
+from CurrentVehicle import g_currentVehicle
 import ResMgr
 import pprint
 
@@ -19,30 +19,6 @@ def run_callbacks():
     global g_engine
     while not event.wait(timeout=1):
         g_engine.run_callbacks()
-
-
-def common_process_arena():
-    arenaType = BigWorld.player().arena.arenaType
-    arenaGuiType = BigWorld.player().arenaGuiType
-    arenaName = R.strings.arenas.num(arenaType.geometryName).dyn('name')()
-    gameplayName = R.strings.arenas.type.dyn(arenaType.gameplayName).dyn('name')()
-    vehicleDesc = avatar_getter.getVehicleTypeDescriptor()
-
-    arenaName = backport.text(arenaName)
-    gameplayName = backport.text(gameplayName)
-    from gui.battle_results.components.common import _ARENA_TYPE_EXT_FORMAT
-    arenaGuiName = i18n.makeString(_ARENA_TYPE_EXT_FORMAT.format(arenaGuiType))
-    vehicleName      = vehicleDesc.type.userString      if vehicleDesc is not None else ''
-    vehicleShortName = vehicleDesc.type.shortUserString if vehicleDesc is not None else ''
-
-    info = dict()
-    info['#arenaName']        = arenaName
-    info['#gameplayName']     = gameplayName
-    info['#arenaGuiName']     = arenaGuiName
-    info['#vehicleName']      = vehicleName
-    info['#vehicleShortName'] = vehicleShortName
-
-    return info
 
 
 def read_file(vfs_path):
@@ -151,11 +127,65 @@ class Engine:
         return activity
 
 
+    def __get_vehicle_desc(self):
+        vehicleDesc = None
+
+        if hasattr(BigWorld.player(), 'vehicleTypeDescriptor'):
+            vehicleDesc = BigWorld.player().vehicleTypeDescriptor
+
+        if vehicleDesc is None and g_currentVehicle.item is not None:
+            vehicleDesc = g_currentVehicle.item.descriptor
+
+        if vehicleDesc is None:
+            vehicleDesc = self.__cache['vehicleDesc']
+
+        self.__cache['vehicleDesc'] = vehicleDesc
+
+        return vehicleDesc
+
+
+    def __get_vehicle_info(self):
+        vehicleDesc = self.__get_vehicle_desc()
+
+        vehicleName      = vehicleDesc.type.userString      if vehicleDesc is not None else ''
+        vehicleShortName = vehicleDesc.type.shortUserString if vehicleDesc is not None else ''
+
+        info = dict()
+        info['#vehicleName']      = vehicleName
+        info['#vehicleShortName'] = vehicleShortName
+
+        return info
+
+
+    def __common_process_arena(self):
+        arenaType = BigWorld.player().arena.arenaType
+        arenaGuiType = BigWorld.player().arenaGuiType
+        arenaName = R.strings.arenas.num(arenaType.geometryName).dyn('name')()
+        gameplayName = R.strings.arenas.type.dyn(arenaType.gameplayName).dyn('name')()
+
+        arenaName = backport.text(arenaName)
+        gameplayName = backport.text(gameplayName)
+        from gui.battle_results.components.common import _ARENA_TYPE_EXT_FORMAT
+        arenaGuiName = i18n.makeString(_ARENA_TYPE_EXT_FORMAT.format(arenaGuiType))
+
+        info = dict()
+        info['#arenaName']        = arenaName
+        info['#gameplayName']     = gameplayName
+        info['#arenaGuiName']     = arenaGuiName
+
+        vehicle_info = self.__get_vehicle_info()
+        info.update(vehicle_info)
+
+        return info
+
+
     def __enter_lobby(self, *_):
         print('__enter_lobby')
-        activity = self.__generate_activity(self._STATES.IN_LOBBY)
+        info = self.__get_vehicle_info()
+        activity = self.__generate_activity(self._STATES.IN_LOBBY, info)
         self.__native.update_activity(activity)
 
+        self.__cache['state'] = self._STATES.IN_LOBBY
 
     def __onArenaPeriodChange(self, period, *_):
         print('__onArenaPeriodChange', period, _)
@@ -166,7 +196,7 @@ class Engine:
         if period not in (ARENA_PERIOD.WAITING, ARENA_PERIOD.PREBATTLE, ARENA_PERIOD.BATTLE):
             return
 
-        info = common_process_arena()
+        info = self.__common_process_arena()
 
         if period == ARENA_PERIOD.WAITING:
             info["#waiting_message"] = backport.text(R.strings.ingame_gui.timer.waiting())
@@ -180,16 +210,34 @@ class Engine:
 
         self.__native.update_activity(activity)
 
+        self.__cache['state'] = PERIOD_TO_STATE[period]
+
 
     def __onEnqueued(self, spaceID):
         print('__onEnqueued')
-        activity = self.__generate_activity(self._STATES.IN_QUEUE)
+        info = self.__get_vehicle_info()
+        activity = self.__generate_activity(self._STATES.IN_QUEUE, info)
         self.__native.update_activity(activity)
+
+        self.__cache['state'] = self._STATES.IN_QUEUE
 
 
     def __onGUISpaceEntered(self, spaceID):
         print('__onGUISpaceEntered')
         if spaceID == GuiGlobalSpaceID.LOBBY:
+            # Is onChanged Event going to be cleared after battle...?
+            # re-register because of that
+            g_currentVehicle.onChanged -= self.__onCurrentVehicleChanged
+            g_currentVehicle.onChanged += self.__onCurrentVehicleChanged
+
+            self.__enter_lobby()
+
+
+    def __onCurrentVehicleChanged(self):
+        print('__onCurrentVehicleChanged')
+        state = self.__cache['state']
+
+        if state in [self._STATES.IN_LOBBY]:
             self.__enter_lobby()
 
 
