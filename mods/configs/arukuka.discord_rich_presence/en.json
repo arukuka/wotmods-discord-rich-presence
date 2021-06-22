@@ -2,12 +2,12 @@
     "in_lobby": {
         "enabled": true,
         "state": "",
-        "details": "In Lobby"
+        "details": "In lobby, selecting {#vehicleShortName}"
     },
     "in_queue": {
         "enabled": true,
         "state": "",
-        "details": "In Queue"
+        "details": "In queue, selecting {#vehicleShortName}"
     },
     "arena_waiting": {
         "enabled": true,
