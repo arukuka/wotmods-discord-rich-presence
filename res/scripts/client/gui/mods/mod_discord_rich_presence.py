@@ -1,6 +1,7 @@
 import threading
 import time
 import json
+import string
 import traceback
 
 import BigWorld
@@ -126,8 +127,13 @@ class Engine:
         activity.timestamps.end = timestamps.end
 
         if enabled:
-            activity.state   = self.__settings[self._STATES_TO_JSON_KEY[state]]['state'  ].format(**info)
-            activity.details = self.__settings[self._STATES_TO_JSON_KEY[state]]['details'].format(**info)
+            print(info)
+            activity.state   = string.Template(
+                    self.__settings[self._STATES_TO_JSON_KEY[state]]['state'  ]
+                ).safe_substitute(info)
+            activity.details = string.Template(
+                    self.__settings[self._STATES_TO_JSON_KEY[state]]['details']
+                ).safe_substitute(info)
 
         activity.get_ref_activity_assets().large_image = 'icon'
 
@@ -158,8 +164,8 @@ class Engine:
         vehicleShortName = vehicleDesc.type.shortUserString if vehicleDesc is not None else ''
 
         info = dict()
-        info['#vehicleName']      = vehicleName
-        info['#vehicleShortName'] = vehicleShortName
+        info['vehicleName']      = vehicleName
+        info['vehicleShortName'] = vehicleShortName
 
         return info
 
@@ -176,9 +182,9 @@ class Engine:
         arenaGuiName = i18n.makeString(_ARENA_TYPE_EXT_FORMAT.format(arenaGuiType))
 
         info = dict()
-        info['#arenaName']        = arenaName
-        info['#gameplayName']     = gameplayName
-        info['#arenaGuiName']     = arenaGuiName
+        info['arenaName']    = arenaName
+        info['gameplayName'] = gameplayName
+        info['arenaGuiName'] = arenaGuiName
 
         vehicle_info = self.__get_vehicle_info()
         info.update(vehicle_info)
@@ -204,7 +210,7 @@ class Engine:
         info = self.__common_process_arena()
 
         if period == ARENA_PERIOD.WAITING:
-            info["#waiting_message"] = backport.text(R.strings.ingame_gui.timer.waiting())
+            info['waiting_message'] = backport.text(R.strings.ingame_gui.timer.waiting())
 
         PERIOD_TO_STATE = {
             ARENA_PERIOD.WAITING:   self._STATES.ARENA_WAITING,
