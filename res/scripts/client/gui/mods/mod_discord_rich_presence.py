@@ -77,6 +77,23 @@ def load_settings():
 
 
 class Engine:
+    class _STATES:
+        UNKNOWN         = 0
+        IN_LOBBY        = 1
+        IN_QUEUE        = 2
+        ARENA_WAITING   = 3
+        ARENA_PREBATTLE = 4
+        ARENA_BATTLE    = 5
+
+    _STATES_TO_JSON_KEY = {
+        _STATES.IN_LOBBY       : 'in_lobby',
+        _STATES.IN_QUEUE       : 'in_queue',
+        _STATES.ARENA_WAITING  : 'arena_waiting',
+        _STATES.ARENA_PREBATTLE: 'arena_prebattle',
+        _STATES.ARENA_BATTLE   : 'arena_battle',
+    }
+
+
     def __init__(self):
         import xfw_loader.python as loader
         xfwnative = loader.get_mod_module('com.modxvm.xfw.native')
@@ -86,12 +103,57 @@ class Engine:
 
         self.__settings = load_settings()
 
+        self.__cache = {
+            'vehicleDesc': None,
+            'launched_time': int(time.time()),
+            'timestamps': self.__native.ActivityTimestamps(),
+            'state': self._STATES.UNKNOWN,
+        }
+
+
+    def __update_timestamps(self, state, next_timestamps):
+        if self.__cache['state'] == state:
+            return self.__cache['timestamps']
+        else:
+            self.__cache['timestamps'] = next_timestamps
+            return next_timestamps
+
+
+    def __generate_activity(self, state, info=dict()):
+        timestamps = self.__native.ActivityTimestamps()
+
+        if state in [self._STATES.IN_LOBBY, self._STATES.IN_QUEUE, self._STATES.ARENA_WAITING]:
+            timestamps.start = int(time.time())
+        elif state in [self._STATES.ARENA_PREBATTLE]:
+            remain = BigWorld.player().arena.periodEndTime - BigWorld.serverTime()
+            timestamps.end = int(time.time() + remain)
+        elif state in [self._STATES.ARENA_BATTLE]:
+            remain = BigWorld.player().arena.periodEndTime - BigWorld.serverTime()
+            elapsed = BigWorld.player().arena.periodLength - remain
+            timestamps.start = int(time.time() - elapsed)
+
+        enabled = state != self._STATES.UNKNOWN and self.__settings[self._STATES_TO_JSON_KEY[state]]['enabled']
+        if not enabled:
+            timestamps.start = self.__cache['launched_time']
+
+        timestamps = self.__update_timestamps(state, timestamps)
+
+        activity = self.__native.Activity()
+        activity.timestamps.start = timestamps.start
+        activity.timestamps.end = timestamps.end
+
+        if enabled:
+            activity.state   = self.__settings[self._STATES_TO_JSON_KEY[state]]['state'  ].format(**info)
+            activity.details = self.__settings[self._STATES_TO_JSON_KEY[state]]['details'].format(**info)
+
+        activity.get_ref_activity_assets().large_image = 'icon'
+
+        return activity
+
 
     def __enter_lobby(self, *_):
         print('__enter_lobby')
-        activity = self.__native.Activity()
-        activity.details = 'In Lobby'
-        activity.timestamps.start = int(time.time())
+        activity = self.__generate_activity(self._STATES.IN_LOBBY)
         self.__native.update_activity(activity)
 
 
@@ -104,39 +166,24 @@ class Engine:
         if period not in (ARENA_PERIOD.WAITING, ARENA_PERIOD.PREBATTLE, ARENA_PERIOD.BATTLE):
             return
 
-        activity = self.__native.Activity()
-
         info = common_process_arena()
-        pprint.pprint(info)
 
         if period == ARENA_PERIOD.WAITING:
             info["#waiting_message"] = backport.text(R.strings.ingame_gui.timer.waiting())
-            activity.timestamps.start = int(time.time())
-        elif period == ARENA_PERIOD.PREBATTLE:
-            remain = BigWorld.player().arena.periodEndTime - BigWorld.serverTime()
-            activity.timestamps.end = int(time.time() + remain)
-        elif period == ARENA_PERIOD.BATTLE:
-            remain = BigWorld.player().arena.periodEndTime - BigWorld.serverTime()
-            elapsed = BigWorld.player().arena.periodLength - remain
-            activity.timestamps.start = int(time.time() - elapsed)
 
-        PERIOD_KEYS = {
-            ARENA_PERIOD.WAITING:   "arena_waiting",
-            ARENA_PERIOD.PREBATTLE: "arena_prebattle",
-            ARENA_PERIOD.BATTLE:    "arena_battle"
+        PERIOD_TO_STATE = {
+            ARENA_PERIOD.WAITING:   self._STATES.ARENA_WAITING,
+            ARENA_PERIOD.PREBATTLE: self._STATES.ARENA_PREBATTLE,
+            ARENA_PERIOD.BATTLE:    self._STATES.ARENA_BATTLE
         }
-        activity.state   = self.__settings[PERIOD_KEYS[period]]['state'  ].format(**info)
-        activity.details = self.__settings[PERIOD_KEYS[period]]['details'].format(**info)
-        activity.get_ref_activity_assets().large_image = 'icon'
+        activity = self.__generate_activity(PERIOD_TO_STATE[period], info)
 
         self.__native.update_activity(activity)
 
 
     def __onEnqueued(self, spaceID):
         print('__onEnqueued')
-        activity = self.__native.Activity()
-        activity.details = 'In Queue'
-        activity.timestamps.start = int(time.time())
+        activity = self.__generate_activity(self._STATES.IN_QUEUE)
         self.__native.update_activity(activity)
 
 
