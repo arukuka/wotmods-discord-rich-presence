@@ -1,6 +1,7 @@
 import threading
 import time
 import json
+import traceback
 
 import BigWorld
 from gui.impl import backport
@@ -26,6 +27,16 @@ def read_file(vfs_path):
         return str(vfs_file.asString)
 
     return None
+
+
+def exceptions_decorate(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except:
+            traceback.print_exc()
+
+    return wrapper
 
 
 def load_settings():
@@ -75,6 +86,12 @@ class Engine:
             'timestamps': self.__native.ActivityTimestamps(),
             'state': self._STATES.UNKNOWN,
         }
+
+        self.__deco_onArenaPeriodChange     = exceptions_decorate(self.__onArenaPeriodChange)
+        self.__deco_enter_lobby             = exceptions_decorate(self.__enter_lobby)
+        self.__deco_onGUISpaceEntered       = exceptions_decorate(self.__onGUISpaceEntered)
+        self.__deco_onEnqueued              = exceptions_decorate(self.__onEnqueued)
+        self.__deco_onCurrentVehicleChanged = exceptions_decorate(self.__onCurrentVehicleChanged)
 
 
     def __update_timestamps(self, state, next_timestamps):
@@ -213,8 +230,8 @@ class Engine:
         if spaceID == GuiGlobalSpaceID.LOBBY:
             # Is onChanged Event going to be cleared after battle...?
             # re-register because of that
-            g_currentVehicle.onChanged -= self.__onCurrentVehicleChanged
-            g_currentVehicle.onChanged += self.__onCurrentVehicleChanged
+            g_currentVehicle.onChanged -= self.__deco_onCurrentVehicleChanged
+            g_currentVehicle.onChanged += self.__deco_onCurrentVehicleChanged
 
             self.__enter_lobby()
 
@@ -234,17 +251,17 @@ class Engine:
     def register_events(self):
         # Main Play Event
         from PlayerEvents import g_playerEvents
-        g_playerEvents.onArenaPeriodChange += self.__onArenaPeriodChange
+        g_playerEvents.onArenaPeriodChange += self.__deco_onArenaPeriodChange
 
         # In Lobby
-        g_playerEvents.onDequeued        += self.__enter_lobby
-        g_playerEvents.onEnqueueFailure  += self.__enter_lobby
-        g_playerEvents.onKickedFromQueue += self.__enter_lobby
+        g_playerEvents.onDequeued        += self.__deco_enter_lobby
+        g_playerEvents.onEnqueueFailure  += self.__deco_enter_lobby
+        g_playerEvents.onKickedFromQueue += self.__deco_enter_lobby
         appLoader = dependency.instance(IAppLoader)
-        appLoader.onGUISpaceEntered += self.__onGUISpaceEntered
+        appLoader.onGUISpaceEntered += self.__deco_onGUISpaceEntered
 
         # In Queue
-        g_playerEvents.onEnqueued += self.__onEnqueued
+        g_playerEvents.onEnqueued += self.__deco_onEnqueued
 
 
 def init():
@@ -253,12 +270,11 @@ def init():
         g_engine = Engine()
 
         global run_callbacks_thread
-        run_callbacks_thread = threading.Thread(target=run_callbacks)
+        run_callbacks_thread = threading.Thread(target=exceptions_decorate(run_callbacks))
         run_callbacks_thread.start()
 
         g_engine.register_events()
     except:
-        import traceback
         traceback.print_exc()
 
 
