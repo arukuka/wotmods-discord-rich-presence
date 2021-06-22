@@ -9,7 +9,6 @@ from helpers import i18n, dependency, getClientLanguage
 from skeletons.gui.app_loader import IAppLoader, GuiGlobalSpaceID
 from CurrentVehicle import g_currentVehicle
 import ResMgr
-import pprint
 
 g_engine = None
 run_callbacks_thread = None
@@ -22,14 +21,9 @@ def run_callbacks():
 
 
 def read_file(vfs_path):
-    print('trying to load {}'.format(vfs_path))
     vfs_file = ResMgr.openSection(vfs_path)
     if vfs_file is not None and ResMgr.isFile(vfs_path):
-        print('    success')
         return str(vfs_file.asString)
-    else:
-        print('    failed: {}'.format(ResMgr.resolveToAbsolutePath(vfs_path)))
-
 
     return None
 
@@ -39,14 +33,11 @@ def load_settings():
     SETTINGS_PATH_FORMAT = '../mods/configs/arukuka.discord_rich_presence/{}.json'
 
     language = getClientLanguage()
-    print(language)
     settings_json = read_file(SETTINGS_PATH_FORMAT.format(language))
     if settings_json is None:
         settings_json = read_file(SETTINGS_PATH_FORMAT.format(DEFAULT_LANGUAGE))
 
-    print(type(settings_json), settings_json)
     settings_json = settings_json.encode('utf-8')
-    print(type(settings_json), settings_json)
     settings = json.loads(settings_json)
 
     return settings
@@ -73,7 +64,6 @@ class Engine:
     def __init__(self):
         import xfw_loader.python as loader
         xfwnative = loader.get_mod_module('com.modxvm.xfw.native')
-        print(xfwnative.unpack_native('arukuka.discord_rich_presence'))
         self.__native = xfwnative.load_native('arukuka.discord_rich_presence', 'engine.pyd', 'engine')
         self.__native.init_engine()
 
@@ -180,7 +170,6 @@ class Engine:
 
 
     def __enter_lobby(self, *_):
-        print('__enter_lobby')
         info = self.__get_vehicle_info()
         activity = self.__generate_activity(self._STATES.IN_LOBBY, info)
         self.__native.update_activity(activity)
@@ -188,7 +177,6 @@ class Engine:
         self.__cache['state'] = self._STATES.IN_LOBBY
 
     def __onArenaPeriodChange(self, period, *_):
-        print('__onArenaPeriodChange', period, _)
         if self.__native is None:
             return
 
@@ -214,7 +202,6 @@ class Engine:
 
 
     def __onEnqueued(self, spaceID):
-        print('__onEnqueued')
         info = self.__get_vehicle_info()
         activity = self.__generate_activity(self._STATES.IN_QUEUE, info)
         self.__native.update_activity(activity)
@@ -223,7 +210,6 @@ class Engine:
 
 
     def __onGUISpaceEntered(self, spaceID):
-        print('__onGUISpaceEntered')
         if spaceID == GuiGlobalSpaceID.LOBBY:
             # Is onChanged Event going to be cleared after battle...?
             # re-register because of that
@@ -234,7 +220,6 @@ class Engine:
 
 
     def __onCurrentVehicleChanged(self):
-        print('__onCurrentVehicleChanged')
         state = self.__cache['state']
 
         if state in [self._STATES.IN_LOBBY]:
