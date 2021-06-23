@@ -16,7 +16,7 @@
     },
     "arena_prebattle": {
         "enabled": true,
-        "state": "Waiting to start",
+        "state": "Awaiting start...",
         "details": "Playing ${vehicleShortName} on ${arenaName}"
     },
     "arena_battle": {
