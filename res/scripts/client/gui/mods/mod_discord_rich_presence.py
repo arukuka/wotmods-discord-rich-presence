@@ -128,7 +128,6 @@ class Engine:
         activity.timestamps.end = timestamps.end
 
         if enabled:
-            print(info)
             activity.state   = string.Template(
                     self.__settings[self._STATES_TO_JSON_KEY[state]]['state'  ]
                 ).safe_substitute(info)
