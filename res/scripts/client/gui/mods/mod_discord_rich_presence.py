@@ -136,7 +136,7 @@ class Engine:
                     self.__settings[self._STATES_TO_JSON_KEY[state]]['details']
                 ).safe_substitute(info)
 
-        activity.get_ref_activity_assets().large_image = 'icon'
+        activity.activity_assets.large_image = 'icon'
 
         return activity
 

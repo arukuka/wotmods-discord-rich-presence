@@ -100,9 +100,9 @@ PYBIND11_MODULE(engine, m)
         .def_property("id",
                       &discord::ActivityParty::GetId,
                       &discord::ActivityParty::SetId)
-        .def("get_ref_size",
-             pybind11::overload_cast<>(&discord::ActivityParty::GetSize),
-             pybind11::return_value_policy::reference)
+        .def_property("size",
+                      pybind11::cpp_function(pybind11::overload_cast<>(&discord::ActivityParty::GetSize), pybind11::return_value_policy::reference),
+                      nullptr)
         ;
 
     pybind11::class_<discord::ActivitySecrets>(m, "ActivitySecrets")
@@ -135,21 +135,18 @@ PYBIND11_MODULE(engine, m)
         .def_property("state",
                       &discord::Activity::GetState,
                       &discord::Activity::SetState)
-        // .def("get_ref_timestamps",
-        //      pybind11::overload_cast<>(&discord::Activity::GetTimestamps),
-        //      pybind11::return_value_policy::reference)
         .def_property("timestamps",
                       pybind11::cpp_function(pybind11::overload_cast<>(&discord::Activity::GetTimestamps), pybind11::return_value_policy::reference),
                       nullptr)
-        .def("get_ref_activity_assets",
-             pybind11::overload_cast<>(&discord::Activity::GetAssets),
-             pybind11::return_value_policy::reference)
-        .def("get_ref_party",
-             pybind11::overload_cast<>(&discord::Activity::GetParty),
-             pybind11::return_value_policy::reference)
-        .def("get_ref_secrets",
-             pybind11::overload_cast<>(&discord::Activity::GetSecrets),
-             pybind11::return_value_policy::reference)
+        .def_property("activity_assets",
+                      pybind11::cpp_function(pybind11::overload_cast<>(&discord::Activity::GetAssets), pybind11::return_value_policy::reference),
+                      nullptr)
+        .def_property("party",
+                      pybind11::cpp_function(pybind11::overload_cast<>(&discord::Activity::GetParty), pybind11::return_value_policy::reference),
+                      nullptr)
+        .def_property("secrets",
+                      pybind11::cpp_function(pybind11::overload_cast<>(&discord::Activity::GetSecrets), pybind11::return_value_policy::reference),
+                      nullptr)
         .def_property("instance",
                       &discord::Activity::GetInstance,
                       &discord::Activity::SetInstance)
