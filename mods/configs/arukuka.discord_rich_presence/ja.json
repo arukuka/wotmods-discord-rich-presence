@@ -1,0 +1,27 @@
+{
+    "in_lobby": {
+        "enabled": true,
+        "state": "",
+        "details": "ガレージで${vehicleShortName}を選択中"
+    },
+    "in_queue": {
+        "enabled": true,
+        "state": "",
+        "details": "${vehicleShortName}でマッチング待機中…"
+    },
+    "arena_waiting": {
+        "enabled": true,
+        "state": "${waiting_message}",
+        "details": "${arenaName}で${vehicleShortName}をプレイ中"
+    },
+    "arena_prebattle": {
+        "enabled": true,
+        "state": "開始待機中…",
+        "details": "${arenaName}で${vehicleShortName}をプレイ中"
+    },
+    "arena_battle": {
+        "enabled": true,
+        "state": "",
+        "details": "${arenaName}で${vehicleShortName}をプレイ中"
+    }
+}
