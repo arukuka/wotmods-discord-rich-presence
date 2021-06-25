@@ -2,7 +2,7 @@
 
 ![cover image](./lfs/cover.png)
 
-This mod makes World of Tnaks enabling Discord Rich Presence.
+This mod makes World of Tanks enabling Discord Rich Presence.
 
 ## 1. Feature
 
