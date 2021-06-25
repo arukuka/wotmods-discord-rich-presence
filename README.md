@@ -28,12 +28,12 @@ Following variables are supported in each context.
 
 |variable|context|description|
 |-|-|-|
-|${vehicleName}|all contexts|long name of vehicle selected (e.g., Object 277)|
-|${vehicleShortName}|all contexts|short name of vehicle selected (e.g., Obj. 277)|
-|${arenaName}|`arena_*`|localized map name (e.g., Karelia, Malinovka, Prokhorovka)|
-|${gameplayName}|`arena_*`|localized game play type (e.g., Standard Battle, Encounter)|
-|${arenaGuiName}|`arena_*`|localized game type (e.g., Random Battle, Advance)|
-|${waiting_message}|`arena_waiting`|localized client message when awaiting players|
+|`${vehicleName}`|`*` (all contexts)|long name of vehicle selected (e.g., Object 277)|
+|`${vehicleShortName}`|`*` (all contexts)|short name of vehicle selected (e.g., Obj. 277)|
+|`${arenaName}`|`arena_*`|localized map name (e.g., Karelia, Malinovka, Prokhorovka)|
+|`${gameplayName}`|`arena_*`|localized game play type (e.g., Standard Battle, Encounter)|
+|`${arenaGuiName}`|`arena_*`|localized game type (e.g., Random Battle, Advance)|
+|`${waiting_message}`|`arena_waiting`|localized client message when awaiting players|
 
 #### 1.2.1. Example
 
