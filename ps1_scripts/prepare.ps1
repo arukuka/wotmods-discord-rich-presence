@@ -73,3 +73,6 @@ Expand-Archive -Path $xfm_native_devel_zip -DestinationPath $xfm_native_root -Fo
 $config['xfm_native_root'] = $xfm_native_root
 
 ConvertTo-Json $config | Out-File $config_file
+
+Write-Host $(Convert-Path $config_file)
+Get-Content $config_file

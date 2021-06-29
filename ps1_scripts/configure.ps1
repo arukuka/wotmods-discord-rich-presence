@@ -12,9 +12,17 @@ $config = ConvertFrom-Json '{}' -AsHashtable
 if (Test-Path $config_file) {
     $config = Get-Content -Path $config_file | ConvertFrom-Json -AsHashtable
 }
+
+Write-Host $(Convert-Path $config_file)
+Get-Content $config_file
+
+Write-Host "config['xfm_native_root']: $($config['xfm_native_root'])"
+Write-Host "xfm_native_root: ${xfm_native_root}"
+Write-Host $($xfm_native_root -ne '')
 if ($xfm_native_root -ne '') {
     $config['xfm_native_root'] = Convert-Path $xfm_native_root
 }
+Write-Host $config['xfm_native_root']
 if ($pybind11_dir -ne '') {
     $config['pybind11_dir'] = Convert-Path $pybind11_dir
 }
