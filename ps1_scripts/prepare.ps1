@@ -56,9 +56,6 @@ $xfm_native_devel_url = ''
 
 foreach ($match in $results)
 {
-    Write-Host $match
-    Write-Host $match.Groups['name']
-    Write-Host $match.Groups['path']
     if ($match.Groups['name'] -match '-devel.zip$')
     {
         $xfm_native_devel_zip = $match.Groups['name']
