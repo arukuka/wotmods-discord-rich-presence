@@ -5,5 +5,15 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-    - run: |
-        & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -prerelease -latest -products * -requires Microsoft.VisualStudio.Component.VC.CMake.Project -property installationPath
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Prepare
+        run: |
+          choco install python2 --params '"/InstallDir:tools\python2"'
+          .\ps1_scripts\prepare.ps1 -python2 tools\python2 -python python
+      - name: Configure
+        run: .\ps1_scripts\configure.ps1
+      - name: Build
+        run: .\ps1_scripts\build.ps1
