@@ -4,7 +4,8 @@ Param(
     [String] $config_file = '.config.json',
     [String] $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe",
     [String] $project_root_dir,
-    [String] $build_root_dir = 'build'
+    [String] $build_root_dir = 'build',
+    [Switch] $use_short_path
 )
 
 $config = ConvertFrom-Json '{}' -AsHashtable
@@ -64,7 +65,8 @@ function Configure {
         [Parameter(Mandatory = $true)] [ValidateNotNullOrEmpty()] [String] $pybind11_dir,
         [Parameter(Mandatory = $true)] [ValidateNotNullOrEmpty()] [String] $build_root_dir,
         [Parameter(Mandatory = $true)] [ValidateNotNullOrEmpty()] [PSCustomObject] $visual_studio,
-        [Parameter(Mandatory = $true)] [ValidateNotNullOrEmpty()] [String] $build_target
+        [Parameter(Mandatory = $true)] [ValidateNotNullOrEmpty()] [String] $build_target,
+        [bool] $use_short_path
     )
 
     $cmake = CMakePath($visual_studio)
@@ -72,6 +74,10 @@ function Configure {
     $tool_name = GetDisplayNameVS($visual_studio)
     $buildKit = "$tool_name - $build_target"
     $build_dir = Join-Path $build_root_dir "${buildKit}\Release"
+    if ($use_short_path)
+    {
+        $build_dir = Join-Path $build_root_dir $build_target
+    }
     New-Item -ItemType Directory $build_dir -Force
 
     # XFM Native libpython_DIR
