@@ -15,8 +15,8 @@ jobs:
           .\ps1_scripts\prepare.ps1 -python2 tools\python2 -python python
       - name: Configure
         run: |
-          .\ps1_scripts\configure.ps1 \
-            -build_root_dir $(Join-Path $(Split-Path -Qualifier ${env:GITHUB_WORKSPACE}) 'build') \
+          .\ps1_scripts\configure.ps1 `
+            -build_root_dir $(Join-Path $(Split-Path -Qualifier ${env:GITHUB_WORKSPACE}) 'build') `
             -use_short_path
       - name: Build
         run: .\ps1_scripts\build.ps1
