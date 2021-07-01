@@ -127,7 +127,8 @@ $build_dirs = @()
 foreach ($target in $BUILD_TARGETS) {
     $dir = Configure -project_root_dir $project_root_dir -build_root_dir $build_root_dir `
                      -xfm_native_root $config['xfm_native_root'] -pybind11_dir $config['pybind11_dir'] `
-                     -visual_studio $visual_studio -build_target $target
+                     -visual_studio $visual_studio -build_target $target `
+                     -use_short_path $use_short_path
     $build_dirs += $dir.FullName
 }
 
