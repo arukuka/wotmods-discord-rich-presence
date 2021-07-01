@@ -113,7 +113,7 @@ function Configure {
         -D PYBIND11_NOPYTHON=ON                `
         -D pybind11_DIR="$pybind11_dir"        `
         -D libpython_DIR="$libpython_DIR"      `
-        -S "$project_root_dir"                 `
+        -S "$project_root_dir\engine"          `
         -B "$build_dir"                        `
         @vs_target                             `
         | Write-Host
