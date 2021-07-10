@@ -12,6 +12,8 @@ if (Test-Path $config_file) {
     $config = Get-Content -Path $config_file | ConvertFrom-Json -AsHashtable
 }
 
+$config['python27_executable'] = $python2
+
 if ($project_root_dir -eq '') {
     $project_root_dir = $MyInvocation.MyCommand.Path
     foreach ($i in [System.Linq.Enumerable]::Range(0, 2)) {

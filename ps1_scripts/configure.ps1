@@ -66,7 +66,7 @@ function CMakePath {
     return $cmake
 }
 
-function Configure {
+function ConfigureEngine {
     param (
         [Parameter(Mandatory = $true)] [ValidateNotNullOrEmpty()] [String] $project_root_dir,
         [Parameter(Mandatory = $true)] [ValidateNotNullOrEmpty()] [String] $xfm_native_root,
@@ -125,11 +125,38 @@ Set-Variable -Name BUILD_TARGETS -Value @('x86', 'amd64') -Option Constant
 $build_dirs = @()
 
 foreach ($target in $BUILD_TARGETS) {
-    $dir = Configure -project_root_dir $project_root_dir -build_root_dir $build_root_dir `
-                     -xfm_native_root $config['xfm_native_root'] -pybind11_dir $config['pybind11_dir'] `
-                     -visual_studio $visual_studio -build_target $target `
-                     -use_short_path $use_short_path
+    $dir = ConfigureEngine -project_root_dir $project_root_dir -build_root_dir $build_root_dir `
+                           -xfm_native_root $config['xfm_native_root'] -pybind11_dir $config['pybind11_dir'] `
+                           -visual_studio $visual_studio -build_target $target `
+                           -use_short_path $use_short_path
     $build_dirs += $dir.FullName
+}
+
+function ConfigurePackage {
+    param (
+        [Parameter(Mandatory = $true)] [ValidateNotNullOrEmpty()] [String] $project_root_dir,
+        [Parameter(Mandatory = $true)] [ValidateNotNullOrEmpty()] [String] $build_root_dir,
+        [Parameter(Mandatory = $true)] [ValidateNotNullOrEmpty()] [String] $python27
+    )
+
+    $cmake = CMakePath($visual_studio)
+
+    $build_dir = Join-Path $build_root_dir "package"
+    New-Item -ItemType Directory $build_dir -Force
+
+    & $cmake `
+        -D PYTHON27_EXECUTABLE="$python27" `
+        -S "$project_root_dir\package"     `
+        -B "$build_dir"                    `
+        | Write-Host
+
+    return Convert-Path $build_dir
+}
+
+$build_dirs += & {
+    $dir = ConfigurePackage -project_root_dir $project_root_dir -build_root_dir $build_root_dir `
+                            -python27 $config['python27_executable']
+    return $dir.FullName
 }
 
 $config['project_root_dir'] = $project_root_dir
