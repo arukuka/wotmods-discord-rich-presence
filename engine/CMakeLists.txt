@@ -20,3 +20,13 @@ set_target_properties(cmake_discord_game_sdk
 set_target_properties(engine
     PROPERTIES
         MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
+if (ARCH STREQUAL "x86_64")
+    set(ENGINE_DESTINATION "res/mods/xfw_packages/discord_rich_presence/native_64bit/")
+elseif (ARCH STREQUAL "x86")
+    set(ENGINE_DESTINATION "res/mods/xfw_packages/discord_rich_presence/native_32bit/")
+else ()
+    message(FATAL_ERROR "not supported ARCH: ${ARCH}")
+endif()
+
+install(TARGETS engine RUNTIME DESTINATION ${ENGINE_DESTINATION})
