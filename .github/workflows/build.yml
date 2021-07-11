@@ -9,10 +9,12 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: true
+      - name: Set up Python 2.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 2.7
       - name: Prepare
-        run: |
-          choco install python2 --limit-output --no-progress --params '"/InstallDir:tools\python2"'
-          .\ps1_scripts\prepare.ps1 -python2 tools\python2 -python python
+        run: .\ps1_scripts\prepare.ps1 -python2 python
       - name: Configure
         run: |
           .\ps1_scripts\configure.ps1 `
