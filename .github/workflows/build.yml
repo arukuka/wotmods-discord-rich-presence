@@ -22,3 +22,5 @@ jobs:
             -use_short_path
       - name: Build
         run: .\ps1_scripts\build.ps1
+      - name: Package
+        run: .\ps1_scripts\package.ps1
