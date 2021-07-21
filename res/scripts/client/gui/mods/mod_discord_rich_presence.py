@@ -7,7 +7,7 @@ import traceback
 import BigWorld
 from gui.impl import backport
 from gui.impl.gen import R
-from helpers import i18n, dependency, getClientLanguage
+from helpers import i18n, dependency, getClientLanguage, getClientVersion
 from skeletons.gui.app_loader import IAppLoader, GuiGlobalSpaceID
 from CurrentVehicle import g_currentVehicle
 import ResMgr
@@ -41,8 +41,9 @@ def exceptions_decorate(func):
 
 
 def load_settings():
+    version = (getClientVersion()).split(' ')[0].replace('v.', '')
     DEFAULT_LANGUAGE = 'en'
-    SETTINGS_PATH_FORMAT = '../mods/configs/arukuka.discord_rich_presence/{}.json'
+    SETTINGS_PATH_FORMAT = '../mods/' + version + '/configs/arukuka.discord_rich_presence/{}.json'
 
     language = getClientLanguage()
     settings_json = read_file(SETTINGS_PATH_FORMAT.format(language))
@@ -291,4 +292,3 @@ def fini():
     global run_callbacks_thread
     if run_callbacks_thread is not None:
         run_callbacks_thread.join()
-
