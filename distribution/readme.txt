@@ -5,9 +5,9 @@
 
     Target files are
 
-        arukuka.discord_rich_presence_0.1.1.wotmod
-        com.modxvm.xfw.loader_8.7.9.0021.wotmod
-        com.modxvm.xfw.native_2.1.8.wotmod
+        arukuka.discord_rich_presence_0.1.2.wotmod
+        com.modxvm.xfw.loader_8.8.0.0039.wotmod
+        com.modxvm.xfw.native_2.1.9.wotmod
 
     Please copy and paste a following folder in
     <World of Tanks installation location>
@@ -19,14 +19,14 @@
 
     For example, a corrent folder layout is as follows where
         <World of Tanks installation location> = D:\Wargaming.net\World_of_Tanks_ASIA
-        <current version>                      = 1.13.0
+        <current version>                      = 1.13.0.1
 
         D:\Wargaming.net\World_of_Tanks_ASIA
         └─── \mods
-             ├─── \1.13.0
-             │    ├─── arukuka.discord_rich_presence_0.1.1.wotmod
-             │    ├─── com.modxvm.xfw.loader_8.7.9.0021.wotmod
-             │    └─── com.modxvm.xfw.native_2.1.8.wotmod
+             ├─── \1.13.0.1
+             │    ├─── arukuka.discord_rich_presence_0.1.2.wotmod
+             │    ├─── com.modxvm.xfw.loader_8.8.0.0039.wotmod
+             │    └─── com.modxvm.xfw.native_2.1.9.wotmod
              │
              └─── \configs\arukuka.discord_rich_presence
                   └─── en.json

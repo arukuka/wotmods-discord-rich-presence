@@ -6,9 +6,9 @@
 
     対象のファイル
 
-        arukuka.discord_rich_presence_0.1.1.wotmod
-        com.modxvm.xfw.loader_8.7.9.0021.wotmod
-        com.modxvm.xfw.native_2.1.8.wotmod
+        arukuka.discord_rich_presence_0.1.2.wotmod
+        com.modxvm.xfw.loader_8.8.0.0039.wotmod
+        com.modxvm.xfw.native_2.1.9.wotmod
 
     以下のファルダを
     <WoT のインストール先>
@@ -21,15 +21,15 @@
 
     例えば、
         <WoT のインストール先> = D:\Wargaming.net\World_of_Tanks_ASIA
-        <現行バージョン>       = 1.13.0
+        <現行バージョン>       = 1.13.0.1
     である場合、正しいフォルダの配置は以下のようになります。
 
         D:\Wargaming.net\World_of_Tanks_ASIA
         └─── \mods
-             ├─── \1.13.0
-             │    ├─── arukuka.discord_rich_presence_0.1.1.wotmod
-             │    ├─── com.modxvm.xfw.loader_8.7.9.0021.wotmod
-             │    └─── com.modxvm.xfw.native_2.1.8.wotmod
+             ├─── \1.13.0.1
+             │    ├─── arukuka.discord_rich_presence_0.1.2.wotmod
+             │    ├─── com.modxvm.xfw.loader_8.8.0.0039.wotmod
+             │    └─── com.modxvm.xfw.native_2.1.9.wotmod
              │
              └─── \configs\arukuka.discord_rich_presence
                   └─── en.json
