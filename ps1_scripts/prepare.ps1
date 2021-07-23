@@ -55,6 +55,8 @@ $regex = [regex]'\[(?<name>.+?)\]\((?<path>.+?)\)'
 $results = $regex.Matches($response.description)
 $xfm_native_devel_zip = ''
 $xfm_native_devel_url = ''
+$xfm_native_wotmod = ''
+$xfm_native_wotmod_url = ''
 
 foreach ($match in $results)
 {
@@ -63,9 +65,15 @@ foreach ($match in $results)
         $xfm_native_devel_zip = $match.Groups['name']
         $xfm_native_devel_url = 'https://gitlab.com/xvm/xfw/xfw.native' + $match.Groups['path']
     }
+    if ($match.Groups['name'] -match '.wotmod$')
+    {
+        $xfm_native_wotmod = $match.Groups['name']
+        $xfm_native_wotmod_url = 'https://gitlab.com/xvm/xfw/xfw.native' + $match.Groups['path']
+    }
 }
 
 New-Item -ItemType Directory $download_dir -Force
+
 $xfm_native_devel_zip = Join-Path $download_dir $xfm_native_devel_zip
 Invoke-WebRequest -Uri $xfm_native_devel_url -OutFile $xfm_native_devel_zip
 $xfm_native_devel_zip_info = [System.IO.FileInfo]$xfm_native_devel_zip
@@ -73,6 +81,25 @@ $xfm_native_root = Join-Path $xfm_native_devel_zip_info.DirectoryName $xfm_nativ
 Expand-Archive -Path $xfm_native_devel_zip -DestinationPath $xfm_native_root -Force
 
 $config['xfm_native_root'] = $xfm_native_root
+
+$xfm_native_wotmod = $(Join-Path $download_dir $xfm_native_wotmod)
+$xfm_native_wotmod = [System.IO.FileInfo]$xfm_native_wotmod
+Invoke-WebRequest -Uri $xfm_native_wotmod_url -OutFile $xfm_native_wotmod
+
+$config['xfm_native_wotmod'] = [System.IO.Path]::GetFullPath($xfm_native_wotmod)
+
+# Download XVM for getting xfm.loader
+$xvm_zip = "xvm-$($project_config.xfm_loader_version).zip"
+$xvm_download_url = "https://dl1.modxvm.com/bin/${xvm_zip}"
+$xvm_zip = Join-Path $download_dir $xvm_zip
+Invoke-WebRequest -Uri $xvm_download_url -OutFile $xvm_zip
+$xvm_zip_info = [System.IO.FileInfo]$xvm_zip
+$xvm_root = Join-Path $xvm_zip_info.DirectoryName $xvm_zip_info.BaseName
+Expand-Archive -Path $xvm_zip -DestinationPath $xvm_root -Force
+
+$xfm_loader_wotmod = Get-ChildItem $xvm_root -Recurse | Where-Object {$_.BaseName -match 'xfw\.loader'}
+# $xfm_loader_wotmod seems like `System.IO.FileInfo` not `System.Array` because number of filtered item is one...
+$config['xfm_loader_wotmod'] = $xfm_loader_wotmod.FullName
 
 ConvertTo-Json $config | Out-File $config_file
 
