@@ -86,7 +86,7 @@ function ConfigureEngine {
     {
         $build_dir = Join-Path $build_root_dir $build_target
     }
-    New-Item -ItemType Directory $build_dir -Force
+    New-Item -ItemType Directory $build_dir -Force | Write-Verbose
 
     # XFM Native libpython_DIR
     $xfm_target = ''
@@ -116,7 +116,7 @@ function ConfigureEngine {
         -S "$project_root_dir\engine"          `
         -B "$build_dir"                        `
         @vs_target                             `
-        | Write-Host
+        | Write-Verbose
 
     return Convert-Path $build_dir
 }
@@ -129,7 +129,7 @@ foreach ($target in $BUILD_TARGETS) {
                            -xfm_native_root $config['xfm_native_root'] -pybind11_dir $config['pybind11_dir'] `
                            -visual_studio $visual_studio -build_target $target `
                            -use_short_path $use_short_path
-    $build_dirs += $dir.FullName
+    $build_dirs += $dir
 }
 
 function ConfigurePackage {
@@ -142,13 +142,13 @@ function ConfigurePackage {
     $cmake = CMakePath($visual_studio)
 
     $build_dir = Join-Path $build_root_dir "package"
-    New-Item -ItemType Directory $build_dir -Force
+    New-Item -ItemType Directory $build_dir -Force | Write-Verbose
 
     & $cmake `
         -D PYTHON27_EXECUTABLE="$python27" `
         -S "$project_root_dir\package"     `
         -B "$build_dir"                    `
-        | Write-Host
+        | Write-Verbose
 
     return Convert-Path $build_dir
 }
@@ -156,7 +156,7 @@ function ConfigurePackage {
 $build_dirs += & {
     $dir = ConfigurePackage -project_root_dir $project_root_dir -build_root_dir $build_root_dir `
                             -python27 $config['python27_executable']
-    return $dir.FullName
+    return $dir
 }
 
 $config['project_root_dir'] = $project_root_dir
