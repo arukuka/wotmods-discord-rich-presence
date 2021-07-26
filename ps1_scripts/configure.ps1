@@ -159,6 +159,20 @@ $build_dirs += & {
     return $dir
 }
 
+$build_dirs += & {
+    $build_dir = Join-Path $build_root_dir "distribution"
+    New-Item -ItemType Directory $build_dir -Force | Write-Verbose
+
+    $cmake = CMakePath($visual_studio)
+    & $cmake `
+        -S "$project_root_dir\distribution" `
+        -B "$build_dir"                     `
+        | Write-Verbose
+
+    $build_dir = Convert-Path $build_dir
+    return $build_dir
+}
+
 $config['project_root_dir'] = $project_root_dir
 $config['build_dirs'] = $build_dirs
 $config['cmake'] = CMakePath($visual_studio)
