@@ -27,3 +27,8 @@ jobs:
         run: .\ps1_scripts\build.ps1
       - name: Package
         run: .\ps1_scripts\package.ps1
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: test
+          path: release
