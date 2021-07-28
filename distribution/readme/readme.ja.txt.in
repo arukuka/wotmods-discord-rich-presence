@@ -1,15 +1,5 @@
 「インストール方法」
 
-    以下のファイルを
-    <WoT のインストール先>/mods/<現行バージョン>/
-    以下に配置して下さい。
-
-    対象のファイル
-
-        arukuka.discord_rich_presence_0.1.2.wotmod
-        com.modxvm.xfw.loader_8.8.0.0039.wotmod
-        com.modxvm.xfw.native_2.1.9.wotmod
-
     以下のファルダを
     <WoT のインストール先>
     にコピー & ペーストして下さい。

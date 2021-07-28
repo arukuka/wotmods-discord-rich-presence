@@ -1,14 +1,5 @@
 "Installation"
 
-    Please place following files under
-    <World of Tanks installation location>\mods\<current version>\
-
-    Target files are
-
-        arukuka.discord_rich_presence_0.1.2.wotmod
-        com.modxvm.xfw.loader_8.8.0.0039.wotmod
-        com.modxvm.xfw.native_2.1.9.wotmod
-
     Please copy and paste a following folder in
     <World of Tanks installation location>
 
