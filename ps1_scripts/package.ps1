@@ -46,13 +46,6 @@ foreach ($target in $ARCHES) {
     Copy-Item $dll_path $install_dll_path
 }
 
-# Remove dirs which is installed by cmake_discord_game_sdk project
-Set-Variable -Name UNUSED_DIRS -Value @('include', 'lib') -Option Constant
-
-foreach ($rm_target in $UNUSED_DIRS) {
-    Remove-Item -Force -Recurse $(Join-Path $install_dir $rm_target)
-}
-
 # Manually copy LICENSE, NOTICE
 Set-Variable -Name COPYRIGHT_FILES -Value @('LICENSE', 'NOTICE') -Option Constant
 foreach ($filename in $COPYRIGHT_FILES) {
