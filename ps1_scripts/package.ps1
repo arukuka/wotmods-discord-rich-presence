@@ -53,6 +53,14 @@ foreach ($rm_target in $UNUSED_DIRS) {
     Remove-Item -Force -Recurse $(Join-Path $install_dir $rm_target)
 }
 
+# Manually copy LICENSE, NOTICE
+Set-Variable -Name COPYRIGHT_FILES -Value @('LICENSE', 'NOTICE') -Option Constant
+foreach ($filename in $COPYRIGHT_FILES) {
+    $from = Join-Path $project_root_dir $filename
+    Copy-Item -Force $from $(Join-Path $install_dir $filename)
+    Copy-Item -Force $from $(Join-Path $install_dir 'package' 'readme' "${filename}.txt")
+}
+
 # Create wotmod
 $wotmod_filename = $project_config.filename
 foreach ($dict in $project_config.GetEnumerator()) {
@@ -62,6 +70,12 @@ foreach ($dict in $project_config.GetEnumerator()) {
     }
 }
 
+Set-Variable -Name WOTMOD_TARGETS_NAME -Value @('res', 'meta.xml', 'LICENSE', 'NOTICE') -Option Constant
+$wotmod_targets = @()
+foreach ($filename in $WOTMOD_TARGETS_NAME) {
+    $wotmod_targets += Convert-Path $(Join-Path $install_dir $filename)
+}
+
 $wotmod_file_path = $(Join-Path $install_dir $wotmod_filename)
 Remove-Item -Force $wotmod_file_path -ErrorAction Ignore
-Compress-Archive -Path $(Join-Path $install_dir '*') -DestinationPath $wotmod_file_path -CompressionLevel NoCompression
+$wotmod_targets | Compress-Archive -DestinationPath $wotmod_file_path -CompressionLevel NoCompression
