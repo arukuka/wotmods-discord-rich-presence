@@ -1,4 +1,5 @@
 Param(
+    [Parameter(Mandatory = $true)] [ValidateNotNullOrEmpty()] [String] $tested_latest_wot_version,
     [String] $xfm_native_root,
     [String] $pybind11_dir,
     [String] $config_file = '.config.json',
@@ -185,6 +186,7 @@ $build_dirs += & {
         -S "$project_root_dir\distribution" `
         -B "$build_dir"                     `
         -D WOTMOD_FILENAME=$wotmod_filename `
+        -D TESTED_LATEST_WOT_VERSION=$tested_latest_wot_version `
         -D XFM_NATIVE_WOTMOD_FILENAME=$(([System.IO.FileInfo]$config['xfm_native_wotmod']).Name) `
         -D XFM_LOADER_WOTMOD_FILENAME=$(([System.IO.FileInfo]$config['xfm_loader_wotmod']).Name)
         | Write-Verbose

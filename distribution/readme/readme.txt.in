@@ -10,11 +10,11 @@
 
     For example, a corrent folder layout is as follows where
         <World of Tanks installation location> = D:\Wargaming.net\World_of_Tanks_ASIA
-        <current version>                      = 1.13.0.1
+        <current version>                      = @TESTED_LATEST_WOT_VERSION@
 
         D:\Wargaming.net\World_of_Tanks_ASIA
         └─── \mods
-             ├─── \1.13.0
+             ├─── \@TESTED_LATEST_WOT_VERSION@
              │    ├─── @WOTMOD_FILENAME@
              │    ├─── @XFM_LOADER_WOTMOD_FILENAME@
              │    └─── @XFM_NATIVE_WOTMOD_FILENAME@

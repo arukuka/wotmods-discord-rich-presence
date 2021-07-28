@@ -11,12 +11,12 @@
 
     例えば、
         <WoT のインストール先> = D:\Wargaming.net\World_of_Tanks_ASIA
-        <現行バージョン>       = 1.13.0.1
+        <現行バージョン>       = @TESTED_LATEST_WOT_VERSION@
     である場合、正しいフォルダの配置は以下のようになります。
 
         D:\Wargaming.net\World_of_Tanks_ASIA
         └─── \mods
-             ├─── \1.13.0
+             ├─── \@TESTED_LATEST_WOT_VERSION@
              │    ├─── @WOTMOD_FILENAME@
              │    ├─── @XFM_LOADER_WOTMOD_FILENAME@
              │    └─── @XFM_NATIVE_WOTMOD_FILENAME@
