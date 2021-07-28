@@ -4,6 +4,7 @@ Param(
     [String] $config_file = '.config.json',
     [String] $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe",
     [String] $project_root_dir,
+    [String] $ini_file,
     [String] $build_root_dir = 'build',
     [Switch] $use_short_path
 )
@@ -33,6 +34,12 @@ if ($project_root_dir -eq '') {
     }
 }
 $project_root_dir = Convert-Path $project_root_dir
+
+if ($ini_file -eq '') {
+    $ini_file = Join-Path $project_root_dir 'project.ini' -Resolve
+}
+
+$project_config = Get-Content $ini_file | Where-Object { $_ -match ".*=.*" } | ConvertFrom-StringData
 
 $visual_studio = & "$vswhere" -prerelease -latest -products * -requires Microsoft.VisualStudio.Component.VC.CMake.Project -format json
 | ConvertFrom-Json
@@ -145,9 +152,10 @@ function ConfigurePackage {
     New-Item -ItemType Directory $build_dir -Force | Write-Verbose
 
     & $cmake `
-        -D PYTHON27_EXECUTABLE="$python27" `
-        -S "$project_root_dir\package"     `
-        -B "$build_dir"                    `
+        -D PYTHON27_EXECUTABLE="$python27"          `
+        -D MOD_VERSION="$($project_config.version)" `
+        -S "$project_root_dir\package"              `
+        -B "$build_dir"                             `
         | Write-Verbose
 
     return Convert-Path $build_dir
@@ -159,6 +167,15 @@ $build_dirs += & {
     return $dir
 }
 
+# for readme files
+$wotmod_filename = $project_config.filename
+foreach ($dict in $project_config.GetEnumerator()) {
+    foreach ($token in $dict.GetEnumerator()) {
+        $pattern = '@{0}@' -f $token.Key
+        $wotmod_filename = $wotmod_filename -replace $pattern, $token.Value
+    }
+}
+
 $build_dirs += & {
     $build_dir = Join-Path $build_root_dir "distribution"
     New-Item -ItemType Directory $build_dir -Force | Write-Verbose
@@ -167,6 +184,9 @@ $build_dirs += & {
     & $cmake `
         -S "$project_root_dir\distribution" `
         -B "$build_dir"                     `
+        -D WOTMOD_FILENAME=$wotmod_filename `
+        -D XFM_NATIVE_WOTMOD_FILENAME=$(([System.IO.FileInfo]$config['xfm_native_wotmod']).Name) `
+        -D XFM_LOADER_WOTMOD_FILENAME=$(([System.IO.FileInfo]$config['xfm_loader_wotmod']).Name)
         | Write-Verbose
 
     $build_dir = Convert-Path $build_dir

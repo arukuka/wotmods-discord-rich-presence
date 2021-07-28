@@ -3,7 +3,7 @@
     "name": "Discord Rich Presence",
     "description": "Discord Rich Presence native module",
 
-    "version": "0.1.2",
+    "version": "@MOD_VERSION@",
     "dependencies": ["com.modxvm.xfw.native"],
 
     "url": "https://github.com/arukuka/wotmods-discord-rich-presence",

@@ -14,10 +14,10 @@
 
         D:\Wargaming.net\World_of_Tanks_ASIA
         └─── \mods
-             ├─── \1.13.0.1
-             │    ├─── arukuka.discord_rich_presence_0.1.2.wotmod
-             │    ├─── com.modxvm.xfw.loader_8.8.0.0039.wotmod
-             │    └─── com.modxvm.xfw.native_2.1.9.wotmod
+             ├─── \1.13.0
+             │    ├─── @WOTMOD_FILENAME@
+             │    ├─── @XFM_LOADER_WOTMOD_FILENAME@
+             │    └─── @XFM_NATIVE_WOTMOD_FILENAME@
              │
              └─── \configs\arukuka.discord_rich_presence
                   └─── en.json
