@@ -55,7 +55,7 @@ foreach ($filename in $COPYRIGHT_FILES) {
 }
 
 # Create wotmod
-$wotmod_filename = $project_config.filename
+$wotmod_filename = $project_config.wotmod_filename
 foreach ($dict in $project_config.GetEnumerator()) {
     foreach ($token in $dict.GetEnumerator()) {
         $pattern = '@{0}@' -f $token.Key
@@ -70,5 +70,29 @@ foreach ($filename in $WOTMOD_TARGETS_NAME) {
 }
 
 $wotmod_file_path = $(Join-Path $install_dir $wotmod_filename)
-Remove-Item -Force $wotmod_file_path -ErrorAction Ignore
-$wotmod_targets | Compress-Archive -DestinationPath $wotmod_file_path -CompressionLevel NoCompression
+$wotmod_targets | Compress-Archive -DestinationPath $wotmod_file_path -CompressionLevel NoCompression -Force
+
+# Create zip
+
+$zip_filename = $project_config.zip_filename
+foreach ($dict in $project_config.GetEnumerator() + $config) {
+    foreach ($token in $dict.GetEnumerator()) {
+        $pattern = '@{0}@' -f $token.Key
+        $zip_filename = $zip_filename -replace $pattern, $token.Value
+    }
+}
+
+## Copy wotmod files
+$mods_dir = Join-Path $install_dir 'package' 'mods'
+$wotmods_install_dir = Join-Path $mods_dir $config['tested_latest_wot_version']
+New-Item -ItemType Directory $wotmods_install_dir -Force | Write-Verbose
+
+foreach ($filepath in @($config['xfm_loader_wotmod'], $config['xfm_native_wotmod'], $wotmod_file_path)) {
+    Copy-Item $filepath $(Join-Path $wotmods_install_dir ([System.IO.FileInfo]$filepath).Name)
+}
+
+## Copy config files
+Copy-Item -Recurse $(Join-Path $project_root_dir 'mods' 'configs') $mods_dir
+
+$zip_file_path = Join-Path $install_dir $zip_filename
+Get-ChildItem $(Join-Path $install_dir 'package') | Compress-Archive -DestinationPath $zip_file_path -Force

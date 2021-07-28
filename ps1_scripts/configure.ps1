@@ -169,7 +169,7 @@ $build_dirs += & {
 }
 
 # for readme files
-$wotmod_filename = $project_config.filename
+$wotmod_filename = $project_config.wotmod_filename
 foreach ($dict in $project_config.GetEnumerator()) {
     foreach ($token in $dict.GetEnumerator()) {
         $pattern = '@{0}@' -f $token.Key
@@ -198,5 +198,6 @@ $build_dirs += & {
 $config['project_root_dir'] = $project_root_dir
 $config['build_dirs'] = $build_dirs
 $config['cmake'] = CMakePath($visual_studio)
+$config['tested_latest_wot_version'] = $tested_latest_wot_version
 
 ConvertTo-Json $config | Out-File $config_file
