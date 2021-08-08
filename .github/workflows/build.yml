@@ -19,6 +19,7 @@ jobs:
         env:
           TESTED_LATEST_WOT_VERSION: ${{ secrets.TESTED_LATEST_WOT_VERSION }}
         run: |
+          $VerbosePreference = 'Continue'
           .\ps1_scripts\configure.ps1 `
             -tested_latest_wot_version "$env:TESTED_LATEST_WOT_VERSION" `
             -build_root_dir $(Join-Path $(Split-Path -Qualifier ${env:GITHUB_WORKSPACE}) 'build') `
