@@ -5,24 +5,13 @@ Param(
     [String] $ini_file
 )
 
-$config = ConvertFrom-Json '{}' -AsHashtable
-if (Test-Path $config_file) {
-    $config = Get-Content -Path $config_file | ConvertFrom-Json -AsHashtable
-}
+. $(Join-Path $PSScriptRoot 'utils.ps1')
 
-if ($project_root_dir -eq '') {
-    $project_root_dir = $MyInvocation.MyCommand.Path
-    foreach ($i in [System.Linq.Enumerable]::Range(0, 2)) {
-        $project_root_dir = Split-Path $project_root_dir -Parent
-    }
-}
-$project_root_dir = Convert-Path $project_root_dir
+$config = Get-ProjectCache $config_file
 
-if ($ini_file -eq '') {
-    $ini_file = Join-Path $project_root_dir 'project.ini' -Resolve
-}
+$project_root_dir = Get-ProjectRootDir $project_root_dir -config $config
 
-$project_config = Get-Content $ini_file | Where-Object { $_ -match ".*=.*" } | ConvertFrom-StringData
+$project_config = Get-ProjectConfig $ini_file -config $config -project_root_dir $project_root_dir
 
 $cmake = $config['cmake']
 
@@ -55,13 +44,6 @@ foreach ($filename in $COPYRIGHT_FILES) {
 }
 
 # Create wotmod
-$wotmod_filename = $project_config.wotmod_filename
-foreach ($dict in $project_config.GetEnumerator()) {
-    foreach ($token in $dict.GetEnumerator()) {
-        $pattern = '@{0}@' -f $token.Key
-        $wotmod_filename = $wotmod_filename -replace $pattern, $token.Value
-    }
-}
 
 Set-Variable -Name WOTMOD_TARGETS_NAME -Value @('res', 'meta.xml', 'LICENSE', 'NOTICE') -Option Constant
 $wotmod_targets = @()
@@ -69,18 +51,10 @@ foreach ($filename in $WOTMOD_TARGETS_NAME) {
     $wotmod_targets += Convert-Path $(Join-Path $install_dir $filename)
 }
 
-$wotmod_file_path = $(Join-Path $install_dir $wotmod_filename)
+$wotmod_file_path = $(Join-Path $install_dir $project_config.wotmod_filename)
 $wotmod_targets | Compress-Archive -DestinationPath $wotmod_file_path -CompressionLevel NoCompression -Force
 
 # Create zip
-
-$zip_filename = $project_config.zip_filename
-foreach ($dict in $project_config.GetEnumerator() + $config) {
-    foreach ($token in $dict.GetEnumerator()) {
-        $pattern = '@{0}@' -f $token.Key
-        $zip_filename = $zip_filename -replace $pattern, $token.Value
-    }
-}
 
 ## Copy wotmod files
 $mods_dir = Join-Path $install_dir 'package' 'mods'
@@ -94,5 +68,5 @@ foreach ($filepath in @($config['xfm_loader_wotmod'], $config['xfm_native_wotmod
 ## Copy config files
 Copy-Item -Recurse $(Join-Path $project_root_dir 'mods' 'configs') $mods_dir
 
-$zip_file_path = Join-Path $install_dir $zip_filename
+$zip_file_path = Join-Path $install_dir $project_config.zip_filename
 Get-ChildItem $(Join-Path $install_dir 'package') | Compress-Archive -DestinationPath $zip_file_path -Force
