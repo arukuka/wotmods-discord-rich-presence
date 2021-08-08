@@ -7,26 +7,16 @@ Param(
     [String] $download_dir = 'downloads'
 )
 
-$config = ConvertFrom-Json '{}' -AsHashtable
-if (Test-Path $config_file) {
-    $config = Get-Content -Path $config_file | ConvertFrom-Json -AsHashtable
-}
+
+. $(Join-Path $PSScriptRoot 'utils.ps1')
+
+$config = Get-ProjectCache $config_file
 
 $config['python27_executable'] = $python2
 
-if ($project_root_dir -eq '') {
-    $project_root_dir = $MyInvocation.MyCommand.Path
-    foreach ($i in [System.Linq.Enumerable]::Range(0, 2)) {
-        $project_root_dir = Split-Path $project_root_dir -Parent
-    }
-}
-$project_root_dir = Convert-Path $project_root_dir
+$project_root_dir = Get-ProjectRootDir $project_root_dir -config $config
 
-if ($ini_file -eq '') {
-    $ini_file = Join-Path $project_root_dir 'project.ini' -Resolve
-}
-
-$project_config = Get-Content $ini_file | Where-Object { $_ -match ".*=.*" } | ConvertFrom-StringData
+$project_config = Get-ProjectConfig $ini_file -config $config -project_root_dir $project_root_dir
 
 function pip()
 {
