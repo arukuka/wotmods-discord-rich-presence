@@ -38,19 +38,24 @@ function Get-ProjectRootDir {
         return $config[$KEY]
     }
     function Get-FromScriptPath {
-        $project_root_dir = $MyInvocation.MyCommand.Path
+        $project_root_dir = $MyInvocation.ScriptName
         foreach ($i in [System.Linq.Enumerable]::Range(0, 2)) {
             $project_root_dir = Split-Path $project_root_dir -Parent
         }
         return $project_root_dir
     }
     if ($project_root_dir -eq '') {
-        return Get-FromScriptPath
-    }
-    if (Test-Path $project_root_dir) {
+        $project_root_dir = Get-FromScriptPath
+        $config[$KEY] = $project_root_dir
         return $project_root_dir
     }
-    return Get-FromScriptPath
+    if (Test-Path $project_root_dir) {
+        $config[$KEY] = $project_root_dir
+        return $project_root_dir
+    }
+    $project_root_dir = Get-FromScriptPath
+    $config[$KEY] = $project_root_dir
+    return $project_root_dir
 }
 
 function Get-ProjectConfig {
