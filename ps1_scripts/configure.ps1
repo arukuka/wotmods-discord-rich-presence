@@ -64,18 +64,19 @@ function CMakePath {
     return $cmake
 }
 
+$cmake = CMakePath($visual_studio)
+
 function ConfigureEngine {
     param (
         [Parameter(Mandatory = $true)] [ValidateNotNullOrEmpty()] [String] $project_root_dir,
         [Parameter(Mandatory = $true)] [ValidateNotNullOrEmpty()] [String] $xfm_native_root,
         [Parameter(Mandatory = $true)] [ValidateNotNullOrEmpty()] [String] $pybind11_dir,
         [Parameter(Mandatory = $true)] [ValidateNotNullOrEmpty()] [String] $build_root_dir,
+        [Parameter(Mandatory = $true)] [ValidateNotNullOrEmpty()] [String] $cmake,
         [Parameter(Mandatory = $true)] [ValidateNotNullOrEmpty()] [PSCustomObject] $visual_studio,
         [Parameter(Mandatory = $true)] [ValidateNotNullOrEmpty()] [String] $build_target,
         [bool] $use_short_path
     )
-
-    $cmake = CMakePath($visual_studio)
 
     $tool_name = GetDisplayNameVS($visual_studio)
     $buildKit = "$tool_name - $build_target"
@@ -125,7 +126,7 @@ $build_dirs = @()
 foreach ($target in $BUILD_TARGETS) {
     $dir = ConfigureEngine -project_root_dir $project_root_dir -build_root_dir $build_root_dir `
                            -xfm_native_root $config['xfm_native_root'] -pybind11_dir $config['pybind11_dir'] `
-                           -visual_studio $visual_studio -build_target $target `
+                           -cmake $cmake -visual_studio $visual_studio -build_target $target `
                            -use_short_path $use_short_path
     $build_dirs += $dir
 }
@@ -134,10 +135,9 @@ function ConfigurePackage {
     param (
         [Parameter(Mandatory = $true)] [ValidateNotNullOrEmpty()] [String] $project_root_dir,
         [Parameter(Mandatory = $true)] [ValidateNotNullOrEmpty()] [String] $build_root_dir,
+        [Parameter(Mandatory = $true)] [ValidateNotNullOrEmpty()] [String] $cmake,
         [Parameter(Mandatory = $true)] [ValidateNotNullOrEmpty()] [String] $python27
     )
-
-    $cmake = CMakePath($visual_studio)
 
     $build_dir = Join-Path $build_root_dir "package"
     New-Item -ItemType Directory $build_dir -Force | Write-Verbose
@@ -154,28 +154,20 @@ function ConfigurePackage {
 
 $build_dirs += & {
     $dir = ConfigurePackage -project_root_dir $project_root_dir -build_root_dir $build_root_dir `
-                            -python27 $config['python27_executable']
+                            -cmake $cmake -python27 $config['python27_executable']
     return $dir
 }
 
 # for readme files
-$wotmod_filename = $project_config.wotmod_filename
-foreach ($dict in $project_config.GetEnumerator()) {
-    foreach ($token in $dict.GetEnumerator()) {
-        $pattern = '@{0}@' -f $token.Key
-        $wotmod_filename = $wotmod_filename -replace $pattern, $token.Value
-    }
-}
 
 $build_dirs += & {
     $build_dir = Join-Path $build_root_dir "distribution"
     New-Item -ItemType Directory $build_dir -Force | Write-Verbose
 
-    $cmake = CMakePath($visual_studio)
     & $cmake `
         -S "$project_root_dir\distribution" `
         -B "$build_dir"                     `
-        -D WOTMOD_FILENAME=$wotmod_filename `
+        -D WOTMOD_FILENAME=$project_config.wotmod_filename `
         -D TESTED_LATEST_WOT_VERSION=$tested_latest_wot_version `
         -D XFM_NATIVE_WOTMOD_FILENAME=$(([System.IO.FileInfo]$config['xfm_native_wotmod']).Name) `
         -D XFM_LOADER_WOTMOD_FILENAME=$(([System.IO.FileInfo]$config['xfm_loader_wotmod']).Name)
