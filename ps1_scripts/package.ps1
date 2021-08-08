@@ -66,7 +66,7 @@ foreach ($filepath in @($config['xfm_loader_wotmod'], $config['xfm_native_wotmod
 }
 
 ## Copy config files
-Copy-Item -Recurse $(Join-Path $project_root_dir 'mods' 'configs') $mods_dir
+Copy-Item -Recurse $(Join-Path $project_root_dir 'mods' 'configs') $mods_dir -Force
 
 $zip_file_path = Join-Path $install_dir $project_config.zip_filename
 Get-ChildItem $(Join-Path $install_dir 'package') | Compress-Archive -DestinationPath $zip_file_path -Force
