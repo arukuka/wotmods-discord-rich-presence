@@ -2,10 +2,9 @@ Param(
     [String] $config_file = '.config.json'
 )
 
-$config = ConvertFrom-Json '{}' -AsHashtable
-if (Test-Path $config_file) {
-    $config = Get-Content -Path $config_file | ConvertFrom-Json -AsHashtable
-}
+. $(Join-Path $PSScriptRoot 'utils.ps1')
+
+$config = Get-ProjectCache $config_file
 
 $cmake = $config['cmake']
 
