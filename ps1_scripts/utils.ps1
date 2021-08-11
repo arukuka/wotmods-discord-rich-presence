@@ -81,3 +81,14 @@ function Get-ProjectConfig {
 
     return $project_config
 }
+
+function Get-AdditionalVersion {
+    param (
+        [String] $commit_sha
+    )
+    if ($commit_sha -eq '')
+    {
+        return ''
+    }
+    return ".$(git rev-parse --short $commit_sha)"
+}

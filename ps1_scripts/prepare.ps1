@@ -4,7 +4,8 @@ Param(
     [String] $project_root_dir,
     [String] $ini_file,
     [String] $config_file = '.config.json',
-    [String] $download_dir = 'downloads'
+    [String] $download_dir = 'downloads',
+    [String] $commit_sha
 )
 
 
@@ -13,6 +14,8 @@ Param(
 $config = Get-ProjectCache $config_file
 
 $config['python27_executable'] = $python2
+
+$config['additional_version'] = Get-AdditionalVersion($commit_sha)
 
 $project_root_dir = Get-ProjectRootDir $project_root_dir -config $config
 
