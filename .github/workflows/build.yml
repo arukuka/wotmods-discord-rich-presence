@@ -1,0 +1,32 @@
+name: build
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Set up Python 2.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 2.7
+      - name: Build
+        env:
+          TESTED_LATEST_WOT_VERSION: ${{ secrets.TESTED_LATEST_WOT_VERSION }}
+        run: |
+          $ErrorView = 'ConciseView'
+          $VerbosePreference = 'Continue'
+          .\ps1_scripts\prepare.ps1 -python2 python -commit_sha "${env:GITHUB_SHA}"
+          .\ps1_scripts\configure.ps1 `
+            -tested_latest_wot_version "$env:TESTED_LATEST_WOT_VERSION" `
+            -build_root_dir $(Join-Path $(Split-Path -Qualifier ${env:GITHUB_WORKSPACE}) 'build') `
+            -use_short_path
+          .\ps1_scripts\build.ps1
+          .\ps1_scripts\package.ps1
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: release\*.zip

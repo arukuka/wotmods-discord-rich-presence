@@ -1,6 +1,6 @@
 <root>
     <id>arukuka.discord_rich_presence</id>
-    <version>0.1.2</version>
+    <version>@MOD_VERSION@</version>
     <name>Discord Rich Presence</name>
     <description>Enable Discord Rich Presence</description>
 </root>
