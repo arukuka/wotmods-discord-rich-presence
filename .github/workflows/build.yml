@@ -17,6 +17,7 @@ jobs:
         env:
           TESTED_LATEST_WOT_VERSION: ${{ secrets.TESTED_LATEST_WOT_VERSION }}
         run: |
+          $ErrorView = 'ConciseView'
           $VerbosePreference = 'Continue'
           .\ps1_scripts\prepare.ps1 -python2 python
           .\ps1_scripts\configure.ps1 `
