@@ -95,6 +95,3 @@ $xfm_loader_wotmod = Get-ChildItem $xvm_root -Recurse | Where-Object {$_.BaseNam
 $config['xfm_loader_wotmod'] = $xfm_loader_wotmod.FullName
 
 ConvertTo-Json $config | Out-File $config_file
-
-Write-Host $(Convert-Path $config_file)
-Get-Content $config_file
