@@ -10,5 +10,5 @@ $cmake = $config['cmake']
 
 foreach ($build_dir in $config['build_dirs'])
 {
-    & $cmake --build $build_dir --config Release | Write-Host
+    & $cmake --build $build_dir --config Release | Write-Verbose
 }
