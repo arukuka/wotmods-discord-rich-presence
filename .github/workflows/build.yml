@@ -29,5 +29,4 @@ jobs:
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: test
-          path: release
+          path: release\*.zip
