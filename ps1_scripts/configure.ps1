@@ -25,7 +25,7 @@ $project_root_dir = Get-ProjectRootDir $project_root_dir -config $config
 
 $project_config = Get-ProjectConfig $ini_file -config $config -project_root_dir $project_root_dir
 
-$visual_studio = & "$vswhere" -prerelease -latest -products * -requires Microsoft.VisualStudio.Component.VC.CMake.Project -format json
+$visual_studio = & "$vswhere" -utf8 -prerelease -latest -products * -requires Microsoft.VisualStudio.Component.VC.CMake.Project -format json
 | ConvertFrom-Json
 
 # I'd like to unify build dirs between this and Visual Studio Code
