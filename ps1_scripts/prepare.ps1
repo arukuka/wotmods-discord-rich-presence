@@ -41,45 +41,54 @@ $pybind11_dir = Join-Path $pybind11_info.Location 'pybind11\share\cmake\pybind11
 
 $config['pybind11_dir'] = $pybind11_dir
 
-# download XFM.Native
-$response = Invoke-RestMethod -Uri "https://gitlab.com/api/v4/projects/xvm%2Fxfw%2Fxfw.native/releases/$($project_config.xfm_native_version)"
-# use regex because a path to devel package is in description written by Markdown
-$regex = [regex]'\[(?<name>.+?)\]\((?<path>.+?)\)'
-$results = $regex.Matches($response.description)
-$xfm_native_devel_zip = ''
-$xfm_native_devel_url = ''
-$xfm_native_wotmod = ''
-$xfm_native_wotmod_url = ''
+# build XFM.Native
+New-Item -ItemType Directory $download_dir -Force
+$xfm_native_repo = 'https://gitlab.com/xvm/xfw/xfw.native.git'
+$xfm_native_source_root = Join-Path $download_dir 'xfm.native'
 
-foreach ($match in $results)
+if (Test-Path $xfm_native_source_root) {
+    Push-Location $xfm_native_source_root
+    git fetch
+    git checkout $project_config.xfm_native_version
+    git submodule update --init --recursive
+    Pop-Location
+} else {
+    git clone --recursive $xfm_native_repo $xfm_native_source_root
+}
+
+Push-Location $xfm_native_source_root
+.\build.ps1
+Pop-Location
+Pop-Location # Pop-Location twice because XFM.Native uses Push-Location but does not use Pop-Location.
+
+$results = Get-ChildItem $(Join-Path $xfm_native_source_root '~output' 'deploy')
+$xfm_native_devel_path = ''
+$xfm_native_wotmod_path = ''
+
+foreach ($result in $results)
 {
-    if ($match.Groups['name'] -match '-devel.zip$')
+    if ($result -match 'extensions')
     {
-        $xfm_native_devel_zip = $match.Groups['name']
-        $xfm_native_devel_url = 'https://gitlab.com/xvm/xfw/xfw.native' + $match.Groups['path']
+        continue
     }
-    if ($match.Groups['name'] -match '.wotmod$')
+    if ($result -match '-devel.zip$')
     {
-        $xfm_native_wotmod = $match.Groups['name']
-        $xfm_native_wotmod_url = 'https://gitlab.com/xvm/xfw/xfw.native' + $match.Groups['path']
+        $xfm_native_devel_path = $result
+    }
+    if ($result -match '.wotmod$')
+    {
+        $xfm_native_wotmod_path = $result
     }
 }
 
 New-Item -ItemType Directory $download_dir -Force
 
-$xfm_native_devel_zip = Join-Path $download_dir $xfm_native_devel_zip
-Invoke-WebRequest -Uri $xfm_native_devel_url -OutFile $xfm_native_devel_zip
-$xfm_native_devel_zip_info = [System.IO.FileInfo]$xfm_native_devel_zip
-$xfm_native_root = Join-Path $xfm_native_devel_zip_info.DirectoryName $xfm_native_devel_zip_info.BaseName
-Expand-Archive -Path $xfm_native_devel_zip -DestinationPath $xfm_native_root -Force
+$xfm_native_root = Join-Path $xfm_native_devel_path.DirectoryName $xfm_native_devel_path.BaseName
+Expand-Archive -Path $xfm_native_devel_path -DestinationPath $xfm_native_root -Force
 
 $config['xfm_native_root'] = $xfm_native_root
 
-$xfm_native_wotmod = $(Join-Path $download_dir $xfm_native_wotmod)
-$xfm_native_wotmod = [System.IO.FileInfo]$xfm_native_wotmod
-Invoke-WebRequest -Uri $xfm_native_wotmod_url -OutFile $xfm_native_wotmod
-
-$config['xfm_native_wotmod'] = [System.IO.Path]::GetFullPath($xfm_native_wotmod)
+$config['xfm_native_wotmod'] = $xfm_native_wotmod_path.FullName
 
 # Download XVM for getting xfm.loader
 $xvm_zip = "xvm-$($project_config.xfm_loader_version).zip"
