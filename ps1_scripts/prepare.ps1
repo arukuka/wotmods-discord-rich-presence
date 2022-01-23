@@ -91,8 +91,8 @@ $config['xfm_native_root'] = $xfm_native_root
 $config['xfm_native_wotmod'] = $xfm_native_wotmod_path.FullName
 
 # Download XVM for getting xfm.loader
-$xvm_zip = "xvm-$($project_config.xfm_loader_version).zip"
-$xvm_download_url = "https://dl1.modxvm.com/bin/${xvm_zip}"
+$xvm_zip = "xvm_$($project_config.xfm_loader_version).zip"
+$xvm_download_url = "https://dl1.modxvm.com/release/${xvm_zip}"
 $xvm_zip = Join-Path $download_dir $xvm_zip
 Invoke-WebRequest -Uri $xvm_download_url -OutFile $xvm_zip
 $xvm_zip_info = [System.IO.FileInfo]$xvm_zip
